@@ -1,7 +1,8 @@
 FROM node:18-alpine
 WORKDIR /usr/src/app
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 RUN npm install
-COPY . .
+COPY --chown=node:node . .
+USER node
 EXPOSE 5002
 CMD ["npm", "start"]
