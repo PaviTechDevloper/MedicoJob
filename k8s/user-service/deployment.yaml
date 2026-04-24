@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: medicojob-user-service:latest
+        image: pavithrasambath2003/user-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5001
