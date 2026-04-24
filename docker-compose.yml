@@ -116,3 +116,17 @@ services:
     tty: true
     networks:
       - medicojob_net
+
+  mongodb:
+    image: mongo:latest
+    container_name: medicojob-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - medicojob_net
+
+volumes:
+  mongodb_data:
