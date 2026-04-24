@@ -1,0 +1,23 @@
+{
+  "name": "medicojob-monorepo",
+  "version": "1.0.0",
+  "description": "Medico Job Finder Monorepo",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && (cd frontend && npm install) && (cd backend/api-gateway && npm install) && (cd backend/user-service && npm install) && (cd backend/job-service && npm install) && (cd backend/matching-service && npm install) && (cd backend/availability-service && npm install) && (cd backend/location-service && npm install) && (cd backend/reputation-service && npm install)",
+    "start": "concurrently --kill-others-on-fail -n \"GATEWAY,USER,JOB,MATCH,AVAIL,LOC,REP,WEB\" -c \"bgBlack.white,bgBlue,bgGreen,bgMagenta,bgCyan,bgYellow,bgRed,bgWhite.black\" \"npm run start:gateway\" \"npm run start:user\" \"npm run start:job\" \"npm run start:matching\" \"npm run start:availability\" \"npm run start:location\" \"npm run start:reputation\" \"npm run start:frontend\"",
+    "start:gateway": "dotenv -e .env -- node backend/api-gateway/server.js",
+    "start:user": "dotenv -e .env -- cross-env PORT=5001 npm start --prefix backend/user-service",
+    "start:job": "dotenv -e .env -- cross-env PORT=5002 npm start --prefix backend/job-service",
+    "start:matching": "dotenv -e .env -- cross-env PORT=5003 npm start --prefix backend/matching-service",
+    "start:availability": "dotenv -e .env -- cross-env PORT=5004 npm start --prefix backend/availability-service",
+    "start:location": "dotenv -e .env -- cross-env PORT=5005 npm start --prefix backend/location-service",
+    "start:reputation": "dotenv -e .env -- cross-env PORT=5006 npm start --prefix backend/reputation-service",
+    "start:frontend": "npm start --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "dotenv-cli": "^7.3.0"
+  }
+}
