@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: medicojob-api-gateway:latest
+        image: pavithrasambath2003/api-gateway:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: medicojob-frontend:latest
+        image: pavithrasambath2003/frontend:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000

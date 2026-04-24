@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: job-service
-        image: medicojob-job-service:latest
+        image: pavithrasambath2003/job-service:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5002

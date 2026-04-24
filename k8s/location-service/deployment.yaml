@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: location-service
-        image: medicojob-location-service:latest
+        image: pavithrasambath2003/location-service:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5005

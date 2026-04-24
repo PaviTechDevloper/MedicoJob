@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: matching-service
-        image: medicojob-matching-service:latest
+        image: pavithrasambath2003/matching-service:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5003

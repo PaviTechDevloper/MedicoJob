@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: availability-service
-        image: medicojob-availability-service:latest
+        image: pavithrasambath2003/availability-service:tagname
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5004
