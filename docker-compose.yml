@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api-gateway:
@@ -6,10 +6,23 @@ services:
     build: ./backend/api-gateway
     ports:
       - "5000:5000"
-    environment:
-      - PORT=5000
     env_file:
       - .env
+    environment:
+      PORT: 5000
+      USER_SERVICE_URL: http://user-service:5001
+      JOB_SERVICE_URL: http://job-service:5002
+      MATCHING_SERVICE_URL: http://matching-service:5003
+      AVAILABILITY_SERVICE_URL: http://availability-service:5004
+      LOCATION_SERVICE_URL: http://location-service:5005
+      REPUTATION_SERVICE_URL: http://reputation-service:5006
+    depends_on:
+      - user-service
+      - job-service
+      - matching-service
+      - availability-service
+      - location-service
+      - reputation-service
     restart: always
 
   user-service:
@@ -17,10 +30,10 @@ services:
     build: ./backend/user-service
     ports:
       - "5001:5001"
-    environment:
-      - PORT=5001
     env_file:
       - .env
+    environment:
+      PORT: 5001
     restart: always
 
   job-service:
@@ -28,10 +41,10 @@ services:
     build: ./backend/job-service
     ports:
       - "5002:5002"
-    environment:
-      - PORT=5002
     env_file:
       - .env
+    environment:
+      PORT: 5002
     restart: always
 
   matching-service:
@@ -39,10 +52,10 @@ services:
     build: ./backend/matching-service
     ports:
       - "5003:5003"
-    environment:
-      - PORT=5003
     env_file:
       - .env
+    environment:
+      PORT: 5003
     restart: always
 
   availability-service:
@@ -50,10 +63,10 @@ services:
     build: ./backend/availability-service
     ports:
       - "5004:5004"
-    environment:
-      - PORT=5004
     env_file:
       - .env
+    environment:
+      PORT: 5004
     restart: always
 
   location-service:
@@ -61,10 +74,10 @@ services:
     build: ./backend/location-service
     ports:
       - "5005:5005"
-    environment:
-      - PORT=5005
     env_file:
       - .env
+    environment:
+      PORT: 5005
     restart: always
 
   reputation-service:
@@ -72,10 +85,10 @@ services:
     build: ./backend/reputation-service
     ports:
       - "5006:5006"
-    environment:
-      - PORT=5006
     env_file:
       - .env
+    environment:
+      PORT: 5006
     restart: always
 
   frontend:
@@ -84,9 +97,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
-    env_file:
-      - .env
+      PORT: 3000
+    depends_on:
+      - api-gateway
     stdin_open: true
     tty: true
     restart: always

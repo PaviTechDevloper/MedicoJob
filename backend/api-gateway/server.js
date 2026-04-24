@@ -10,14 +10,14 @@ app.get('/health', (req, res) => res.send('API Gateway is running'));
 
 // Proxy definitions
 const proxies = [
-  { path: '/auth', target: 'http://localhost:5001' },
-  { path: '/jobs', target: 'http://localhost:5002', ws: true },
-  { path: '/match', target: 'http://localhost:5003' },
-  { path: '/availability', target: 'http://localhost:5004' },
-  { path: '/location', target: 'http://localhost:5005' },
-  { path: '/nearby', target: 'http://localhost:5005' },
-  { path: '/reviews', target: 'http://localhost:5006' },
-  { path: '/socket.io', target: 'http://localhost:5002', ws: true }, // WebSocket for Job Service
+  { path: '/auth', target: process.env.USER_SERVICE_URL || 'http://user-service:5001' },
+  { path: '/jobs', target: process.env.JOB_SERVICE_URL || 'http://job-service:5002', ws: true },
+  { path: '/match', target: process.env.MATCHING_SERVICE_URL || 'http://matching-service:5003' },
+  { path: '/availability', target: process.env.AVAILABILITY_SERVICE_URL || 'http://availability-service:5004' },
+  { path: '/location', target: process.env.LOCATION_SERVICE_URL || 'http://location-service:5005' },
+  { path: '/nearby', target: process.env.LOCATION_SERVICE_URL || 'http://location-service:5005' },
+  { path: '/reviews', target: process.env.REPUTATION_SERVICE_URL || 'http://reputation-service:5006' },
+  { path: '/socket.io', target: process.env.JOB_SERVICE_URL || 'http://job-service:5002', ws: true },
 ];
 
 proxies.forEach(p => {
