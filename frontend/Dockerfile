@@ -1,21 +1,14 @@
-# ---------- Stage 1: Dependencies ----------
-FROM node:18-alpine AS deps
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-RUN npm ci --only=production
 
+RUN npm install
 
-# ---------- Stage 2: Runtime ----------
-FROM node:18-alpine AS runner
+COPY . .
 
-WORKDIR /usr/src/app
-
-ENV NODE_ENV=production
-
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node . .
+RUN chown -R node:node /usr/src/app
 
 USER node
 
