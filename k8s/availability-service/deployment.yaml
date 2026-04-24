@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: availability-service
+  labels:
+    app: availability-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: availability-service
+  template:
+    metadata:
+      labels:
+        app: availability-service
+    spec:
+      containers:
+      - name: availability-service
+        image: medicojob-availability-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5004
+        env:
+        - name: PORT
+          value: "5004"
+        envFrom:
+        - configMapRef:
+            name: medicojob-config

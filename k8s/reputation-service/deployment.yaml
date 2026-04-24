@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reputation-service
+  labels:
+    app: reputation-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reputation-service
+  template:
+    metadata:
+      labels:
+        app: reputation-service
+    spec:
+      containers:
+      - name: reputation-service
+        image: medicojob-reputation-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5006
+        env:
+        - name: PORT
+          value: "5006"
+        envFrom:
+        - configMapRef:
+            name: medicojob-config
