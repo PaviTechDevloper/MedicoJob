@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   api-gateway:
+    container_name: api-gateway-container
     build: ./backend/api-gateway
     ports:
       - "5000:5000"
@@ -9,8 +10,10 @@ services:
       - PORT=5000
     env_file:
       - .env
+    restart: always
 
   user-service:
+    container_name: user-service-container
     build: ./backend/user-service
     ports:
       - "5001:5001"
@@ -18,8 +21,10 @@ services:
       - PORT=5001
     env_file:
       - .env
+    restart: always
 
   job-service:
+    container_name: job-service-container
     build: ./backend/job-service
     ports:
       - "5002:5002"
@@ -27,8 +32,10 @@ services:
       - PORT=5002
     env_file:
       - .env
+    restart: always
 
   matching-service:
+    container_name: matching-service-container
     build: ./backend/matching-service
     ports:
       - "5003:5003"
@@ -36,8 +43,10 @@ services:
       - PORT=5003
     env_file:
       - .env
+    restart: always
 
   availability-service:
+    container_name: availability-service-container
     build: ./backend/availability-service
     ports:
       - "5004:5004"
@@ -45,8 +54,10 @@ services:
       - PORT=5004
     env_file:
       - .env
+    restart: always
 
   location-service:
+    container_name: location-service-container
     build: ./backend/location-service
     ports:
       - "5005:5005"
@@ -54,8 +65,10 @@ services:
       - PORT=5005
     env_file:
       - .env
+    restart: always
 
   reputation-service:
+    container_name: reputation-service-container
     build: ./backend/reputation-service
     ports:
       - "5006:5006"
@@ -63,8 +76,10 @@ services:
       - PORT=5006
     env_file:
       - .env
+    restart: always
 
   frontend:
+    container_name: frontend-container
     build: ./frontend
     ports:
       - "3000:3000"
@@ -74,3 +89,4 @@ services:
       - .env
     stdin_open: true
     tty: true
+    restart: always
