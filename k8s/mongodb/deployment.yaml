@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongodb
+  namespace: pavi-ns
   labels:
     app: mongodb
 spec:

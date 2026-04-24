@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: reputation-service
+  namespace: pavi-ns
   labels:
     app: reputation-service
 spec:

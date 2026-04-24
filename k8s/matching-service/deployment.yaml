@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: matching-service
+  namespace: pavi-ns
   labels:
     app: matching-service
 spec:
