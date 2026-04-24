@@ -32,10 +32,13 @@ services:
       - "5001:5001"
     environment:
       - PORT=5001
+      - MONGO_URI_USER=mongodb://mongodb:27017/medicojob_user_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   job-service:
     container_name: medicojob-job-service
@@ -45,10 +48,13 @@ services:
       - "5002:5002"
     environment:
       - PORT=5002
+      - MONGO_URI_JOB=mongodb://mongodb:27017/medicojob_job_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   matching-service:
     container_name: medicojob-matching-service
@@ -58,10 +64,13 @@ services:
       - "5003:5003"
     environment:
       - PORT=5003
+      - MONGO_URI_MATCHING=mongodb://mongodb:27017/medicojob_matching_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   availability-service:
     container_name: medicojob-availability-service
@@ -71,10 +80,13 @@ services:
       - "5004:5004"
     environment:
       - PORT=5004
+      - MONGO_URI_AVAILABILITY=mongodb://mongodb:27017/medicojob_availability_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   location-service:
     container_name: medicojob-location-service
@@ -84,10 +96,13 @@ services:
       - "5005:5005"
     environment:
       - PORT=5005
+      - MONGO_URI_LOCATION=mongodb://mongodb:27017/medicojob_location_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   reputation-service:
     container_name: medicojob-reputation-service
@@ -97,10 +112,13 @@ services:
       - "5006:5006"
     environment:
       - PORT=5006
+      - MONGO_URI_REPUTATION=mongodb://mongodb:27017/medicojob_reputation_v2
     env_file:
       - .env
     networks:
       - medicojob_net
+    depends_on:
+      - mongodb
 
   frontend:
     container_name: medicojob-frontend
