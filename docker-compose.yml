@@ -1,71 +1,105 @@
 version: '3.8'
 
+networks:
+  medicojob_net:
+    driver: bridge
+
 services:
   api-gateway:
+    container_name: medicojob-api-gateway
     build: ./backend/api-gateway
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
       - PORT=5000
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   user-service:
+    container_name: medicojob-user-service
     build: ./backend/user-service
+    restart: unless-stopped
     ports:
       - "5001:5001"
     environment:
       - PORT=5001
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   job-service:
+    container_name: medicojob-job-service
     build: ./backend/job-service
+    restart: unless-stopped
     ports:
       - "5002:5002"
     environment:
       - PORT=5002
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   matching-service:
+    container_name: medicojob-matching-service
     build: ./backend/matching-service
+    restart: unless-stopped
     ports:
       - "5003:5003"
     environment:
       - PORT=5003
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   availability-service:
+    container_name: medicojob-availability-service
     build: ./backend/availability-service
+    restart: unless-stopped
     ports:
       - "5004:5004"
     environment:
       - PORT=5004
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   location-service:
+    container_name: medicojob-location-service
     build: ./backend/location-service
+    restart: unless-stopped
     ports:
       - "5005:5005"
     environment:
       - PORT=5005
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   reputation-service:
+    container_name: medicojob-reputation-service
     build: ./backend/reputation-service
+    restart: unless-stopped
     ports:
       - "5006:5006"
     environment:
       - PORT=5006
     env_file:
       - .env
+    networks:
+      - medicojob_net
 
   frontend:
+    container_name: medicojob-frontend
     build: ./frontend
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
@@ -74,3 +108,5 @@ services:
       - .env
     stdin_open: true
     tty: true
+    networks:
+      - medicojob_net
