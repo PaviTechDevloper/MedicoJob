@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: reputation-service
-        image: pavithrasambath2003/reputation-service:tagname
+        image: pavithrasambath2003/reputation-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5006

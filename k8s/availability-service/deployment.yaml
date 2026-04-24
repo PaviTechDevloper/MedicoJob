@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: availability-service
-        image: pavithrasambath2003/availability-service:tagname
+        image: pavithrasambath2003/availability-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5004

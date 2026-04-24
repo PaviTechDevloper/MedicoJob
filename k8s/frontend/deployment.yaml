@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: pavithrasambath2003/frontend:tagname
+        image: pavithrasambath2003/frontend:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000

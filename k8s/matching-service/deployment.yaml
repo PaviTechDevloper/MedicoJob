@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: matching-service
-        image: pavithrasambath2003/matching-service:tagname
+        image: pavithrasambath2003/matching-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5003

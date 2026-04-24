@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: pavithrasambath2003/api-gateway:tagname
+        image: pavithrasambath2003/api-gateway:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: location-service
-        image: pavithrasambath2003/location-service:tagname
+        image: pavithrasambath2003/location-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5005

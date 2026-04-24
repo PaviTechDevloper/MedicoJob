@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: job-service
-        image: pavithrasambath2003/job-service:tagname
+        image: pavithrasambath2003/job-service:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5002
