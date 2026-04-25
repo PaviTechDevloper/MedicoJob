@@ -4,7 +4,7 @@ import API_BASE_URL from '../apiConfig';
 import JobCard from '../components/JobCard';
 import {
   Search, MapPin, Briefcase, DollarSign, Filter, X,
-  ChevronDown, SlidersHorizontal, Trash2, Map, Navigation
+  ChevronDown, SlidersHorizontal, Trash2, Map, Navigation, Clock
 } from 'lucide-react';
 import { debounce } from 'lodash';
 
