@@ -27,3 +27,5 @@ spec:
         env:
         - name: HOST
           value: "0.0.0.0"
+        - name: PORT
+          value: "3000"
