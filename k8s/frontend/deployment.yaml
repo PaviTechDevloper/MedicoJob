@@ -24,3 +24,6 @@ spec:
         envFrom:
         - configMapRef:
             name: medicojob-config
+        env:
+        - name: HOST
+          value: "0.0.0.0"
