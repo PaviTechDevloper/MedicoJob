@@ -12,3 +12,4 @@ data:
   LOCATION_SERVICE_URL: "http://location-service:5005"
   REPUTATION_SERVICE_URL: "http://reputation-service:5006"
   MONGO_URI: "mongodb://mongodb:27017/medicojob"
+  JWT_SECRET: "super_secret_jwt_key_medicojob_2026"
