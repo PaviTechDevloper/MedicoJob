@@ -20,7 +20,16 @@ spec:
         image: pavithrasambath2003/frontend:v1
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 3000
         envFrom:
         - configMapRef:
             name: medicojob-config
+        env:
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "3000"
+        - name: REACT_APP_API_URL
+          value: "http://43.205.203.210:32290"
+        - name: REACT_APP_SOCKET_URL
+          value: "http://43.205.203.210:32290"
