@@ -18,7 +18,7 @@ spec:
       containers:
       - name: api-gateway
         image: pavithrasambath2003/api-gateway:v1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         readinessProbe:
           tcpSocket:
             port: 5000
