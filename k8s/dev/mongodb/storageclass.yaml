@@ -6,4 +6,4 @@ provisioner: nfs.csi.k8s.io
 parameters:
   server: 10.0.2.222
   share: /var/lib/data
-volumeBindingMode: WaitForFirstConsumer
+volumeBindingMode: Immediate
