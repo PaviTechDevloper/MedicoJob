@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: pavithrasambath2003/frontend:v1
+        image: pavithrasambath2003/frontend:v2
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
