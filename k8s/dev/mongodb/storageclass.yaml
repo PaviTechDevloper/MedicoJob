@@ -4,7 +4,7 @@ metadata:
   name: standard
 provisioner: nfs.csi.k8s.io
 parameters:
-  server: 10.0.2.222
+  server: [IP_ADDRESS]
   share: /var/lib/data
 volumeBindingMode: Immediate
 mountOptions:
