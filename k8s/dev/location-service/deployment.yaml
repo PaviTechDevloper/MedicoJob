@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dev
+  name: location-service
+  labels:
+    app: location-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: location-service
+  template:
+    metadata:
+      labels:
+        app: location-service
+    spec:
+      containers:
+      - name: location-service
+        image: pavithrasambath2003/location-service:v1
+        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          tcpSocket:
+            port: 5005
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 5005
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        ports:
+        - containerPort: 5005
+        env:
+        - name: PORT
+          value: "5005"
+        envFrom:
+        - configMapRef:
+            name: medicojob-config
+        - secretRef:
+            name: medicojob-secrets
+
+
+

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dev
+  name: reputation-service
+  labels:
+    app: reputation-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reputation-service
+  template:
+    metadata:
+      labels:
+        app: reputation-service
+    spec:
+      containers:
+      - name: reputation-service
+        image: pavithrasambath2003/reputation-service:v1
+        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          tcpSocket:
+            port: 5006
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 5006
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        ports:
+        - containerPort: 5006
+        env:
+        - name: PORT
+          value: "5006"
+        envFrom:
+        - configMapRef:
+            name: medicojob-config
+        - secretRef:
+            name: medicojob-secrets
+
+
+

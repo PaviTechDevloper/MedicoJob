@@ -61,3 +61,9 @@ Restarted all backend services to ensure they all loaded the latest ConfigMap va
 ```bash
 kubectl rollout restart deployment job-service matching-service availability-service location-service reputation-service -n pavi-ns
 ```
+
+## 7. Hardcoded IPs in Deployment Files (Best Practices)
+**Symptoms:** Putting `REACT_APP_API_URL` with a hardcoded public IP directly inside `frontend/deployment.yaml` is considered bad practice because IPs change and it clutters the deployment file.
+**Solution/Options:** We removed the hardcoded IPs from the deployment file. To fix the resulting API connection errors, you must use one of two approaches:
+- **Option A (ConfigMap):** Add `REACT_APP_API_URL` to the central `k8s/configmap.yaml` instead. The deployment will automatically inject it via `envFrom: configMapRef`. This keeps the deployment YAML perfectly clean.
+- **Option B (NGINX Proxy):** Implement a multi-stage Docker build that serves the React app via NGINX, and configure NGINX to proxy `/api` requests to the internal Kubernetes DNS (`api-gateway:5000`). This completely eliminates the need for hardcoded public IPs, but requires rebuilding the Docker image.
