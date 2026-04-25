@@ -29,3 +29,7 @@ spec:
           value: "0.0.0.0"
         - name: PORT
           value: "3000"
+        - name: REACT_APP_API_URL
+          value: "http://43.205.203.210:32290"
+        - name: REACT_APP_SOCKET_URL
+          value: "http://43.205.203.210:32290"
