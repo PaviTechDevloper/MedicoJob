@@ -17,6 +17,7 @@ const proxies = [
   { path: '/location', target: process.env.LOCATION_SERVICE_URL || 'http://location-service:5005' },
   { path: '/nearby', target: process.env.LOCATION_SERVICE_URL || 'http://location-service:5005' },
   { path: '/reviews', target: process.env.REPUTATION_SERVICE_URL || 'http://reputation-service:5006' },
+  { path: '/socket.io', target: process.env.JOB_SERVICE_URL || 'http://job-service:5002', ws: true },
 ];
 
 // Explicitly define the WebSocket proxy for socket.io

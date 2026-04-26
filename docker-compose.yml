@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   medicojob_net:
@@ -6,145 +6,112 @@ networks:
 
 services:
   api-gateway:
-    container_name: medicojob-api-gateway
+    container_name: api-gateway-container
     build: ./backend/api-gateway
     restart: unless-stopped
     ports:
       - "5000:5000"
-    environment:
-      - PORT=5000
-      - USER_SERVICE_URL=http://user-service:5001
-      - JOB_SERVICE_URL=http://job-service:5002
-      - MATCHING_SERVICE_URL=http://matching-service:5003
-      - AVAILABILITY_SERVICE_URL=http://availability-service:5004
-      - LOCATION_SERVICE_URL=http://location-service:5005
-      - REPUTATION_SERVICE_URL=http://reputation-service:5006
     env_file:
       - .env
-    networks:
-      - medicojob_net
+    environment:
+      PORT: 5000
+      USER_SERVICE_URL: http://user-service:5001
+      JOB_SERVICE_URL: http://job-service:5002
+      MATCHING_SERVICE_URL: http://matching-service:5003
+      AVAILABILITY_SERVICE_URL: http://availability-service:5004
+      LOCATION_SERVICE_URL: http://location-service:5005
+      REPUTATION_SERVICE_URL: http://reputation-service:5006
+    depends_on:
+      - user-service
+      - job-service
+      - matching-service
+      - availability-service
+      - location-service
+      - reputation-service
+    restart: always
 
   user-service:
-    container_name: medicojob-user-service
+    container_name: user-service-container
     build: ./backend/user-service
     restart: unless-stopped
     ports:
       - "5001:5001"
-    environment:
-      - PORT=5001
-      - MONGO_URI_USER=mongodb://mongodb:27017/medicojob_user_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5001
+    restart: always
 
   job-service:
-    container_name: medicojob-job-service
+    container_name: job-service-container
     build: ./backend/job-service
     restart: unless-stopped
     ports:
       - "5002:5002"
-    environment:
-      - PORT=5002
-      - MONGO_URI_JOB=mongodb://mongodb:27017/medicojob_job_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5002
+    restart: always
 
   matching-service:
-    container_name: medicojob-matching-service
+    container_name: matching-service-container
     build: ./backend/matching-service
     restart: unless-stopped
     ports:
       - "5003:5003"
-    environment:
-      - PORT=5003
-      - MONGO_URI_MATCHING=mongodb://mongodb:27017/medicojob_matching_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5003
+    restart: always
 
   availability-service:
-    container_name: medicojob-availability-service
+    container_name: availability-service-container
     build: ./backend/availability-service
     restart: unless-stopped
     ports:
       - "5004:5004"
-    environment:
-      - PORT=5004
-      - MONGO_URI_AVAILABILITY=mongodb://mongodb:27017/medicojob_availability_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5004
+    restart: always
 
   location-service:
-    container_name: medicojob-location-service
+    container_name: location-service-container
     build: ./backend/location-service
     restart: unless-stopped
     ports:
       - "5005:5005"
-    environment:
-      - PORT=5005
-      - MONGO_URI_LOCATION=mongodb://mongodb:27017/medicojob_location_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5005
+    restart: always
 
   reputation-service:
-    container_name: medicojob-reputation-service
+    container_name: reputation-service-container
     build: ./backend/reputation-service
     restart: unless-stopped
     ports:
       - "5006:5006"
-    environment:
-      - PORT=5006
-      - MONGO_URI_REPUTATION=mongodb://mongodb:27017/medicojob_reputation_v2
     env_file:
       - .env
-    networks:
-      - medicojob_net
-    depends_on:
-      - mongodb
+    environment:
+      PORT: 5006
+    restart: always
 
   frontend:
-    container_name: medicojob-frontend
+    container_name: frontend-container
     build: ./frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
-    env_file:
-      - .env
+      PORT: 3000
+    depends_on:
+      - api-gateway
     stdin_open: true
     tty: true
-    networks:
-      - medicojob_net
-
-  mongodb:
-    image: mongo:latest
-    container_name: medicojob-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - medicojob_net
-
-volumes:
-  mongodb_data:
+    restart: always
