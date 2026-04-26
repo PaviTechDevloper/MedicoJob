@@ -6,10 +6,10 @@ on:
       - opened
       - synchronize
     branches:
-      - main
+      - master
   push:
     branches:
-      - main
+      - master
 
 concurrency:
   group: medicojob-pr-${{ github.repository }}-${{ github.ref }}

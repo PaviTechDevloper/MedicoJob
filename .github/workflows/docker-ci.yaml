@@ -5,10 +5,17 @@ on:
     types:
       - closed
     branches:
-      - main
+      - master
+  workflow_run:
+    workflows:
+      - Medicojob CI Pipeline
+    types:
+      - completed
+    branches:
+      - master
 
 concurrency:
-  group: medicojob-docker-${{ github.repository }}-${{ github.event.pull_request.number }}
+  group: medicojob-docker-${{ github.repository }}-${{ github.event.pull_request.number || github.event.workflow_run.id || github.run_id }}
   cancel-in-progress: false
 
 permissions:
@@ -21,7 +28,7 @@ permissions:
 jobs:
   verify-release:
     name: Verify merged PR and CI
-    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build') }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +37,13 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
+
+            if (context.eventName === 'workflow_run') {
+              const run = context.payload.workflow_run;
+              core.info(`CI passed: ${run.html_url}`);
+              return;
+            }
+
             const headSha = context.payload.pull_request.head.sha;
 
             const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
