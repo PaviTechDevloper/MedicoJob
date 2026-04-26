@@ -5,8 +5,8 @@ import { API_BASE_URL } from '../utils/api';
 import { AuthContext } from '../context/AuthContext';
 import JobCard from '../components/JobCard';
 import {
-  Briefcase, Clock, CheckCircle, Sparkles, Star, TrendingUp,
-  Compass, ArrowRight, ClipboardList, Circle, Zap, AlertCircle, 
+  Briefcase, Clock, Sparkles, Star,
+  ArrowRight, ClipboardList, Zap, AlertCircle,
   ChevronRight, XCircle, MapPin, DollarSign
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -143,11 +143,12 @@ const DoctorDashboard = () => {
 
       {activeTab === 'applications' && (
         <section>
-          {appLoading ? (
+          {appLoading && (
             <div className="flex justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-100 border-t-emerald-600"></div>
             </div>
-          ) : myApplications.length > 0 ? (
+          )}
+          {!appLoading && myApplications.length > 0 && (
             <div className="space-y-6">
               {myApplications.map(app => {
                 const sc = STATUS_CONFIG[app.applicationStatus] || STATUS_CONFIG.applied;
@@ -195,7 +196,8 @@ const DoctorDashboard = () => {
                 );
               })}
             </div>
-          ) : (
+          )}
+          {!appLoading && myApplications.length === 0 && (
             <div className="py-20 text-center bg-white rounded-[2.5rem] border border-dashed border-slate-200">
               <ClipboardList size={40} className="text-slate-200 mx-auto mb-4" />
               <h3 className="text-xl font-black text-slate-700 mb-2">No Applications Yet</h3>
@@ -209,15 +211,17 @@ const DoctorDashboard = () => {
   );
 };
 
-const StatCard = ({ icon, label, value, color, bg }) => (
-  <div className="card p-6 bg-white flex flex-col justify-between">
-    <div className={`w-10 h-10 rounded-xl ${bg} ${color} flex items-center justify-center mb-4`}>{icon}</div>
-    <div>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-      <h3 className="text-3xl font-black text-slate-900">{String(value).padStart(2, '0')}</h3>
+function StatCard({ icon, label, value, color, bg }) {
+  return (
+    <div className="card p-6 bg-white flex flex-col justify-between">
+      <div className={`w-10 h-10 rounded-xl ${bg} ${color} flex items-center justify-center mb-4`}>{icon}</div>
+      <div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+        <h3 className="text-3xl font-black text-slate-900">{String(value).padStart(2, '0')}</h3>
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
 StatCard.propTypes = {
   icon: PropTypes.node.isRequired,

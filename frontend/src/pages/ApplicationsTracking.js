@@ -22,9 +22,9 @@ function FeedbackModal({ type, onConfirm, onCancel }) {
   const isReject = type === 'rejected';
 
   return (
-    <div
-      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
-      role="dialog"
+    <dialog
+      open
+      className="fixed inset-0 m-0 max-h-none max-w-none border-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
       aria-modal="true"
     >
       <div className="bg-white rounded-[2rem] max-w-md w-full shadow-2xl p-8">
@@ -65,7 +65,7 @@ function FeedbackModal({ type, onConfirm, onCancel }) {
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -117,9 +117,9 @@ function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClos
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
-      role="dialog"
+    <dialog
+      open
+      className="fixed inset-0 m-0 max-h-none max-w-none border-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
       aria-modal="true"
     >
       <div
@@ -221,16 +221,16 @@ function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClos
               <section>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Locations</h4>
                 <div className="flex flex-wrap gap-2">
-                  {applicant.preferredLocations?.map((loc, i) => (
-                    <span key={i} className="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase">{loc}</span>
+                  {applicant.preferredLocations?.map((loc) => (
+                    <span key={loc} className="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase">{loc}</span>
                   )) || <span className="text-slate-300 text-xs italic">No preferences set</span>}
                 </div>
               </section>
               <section>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Skills</h4>
                 <div className="flex flex-wrap gap-2">
-                  {applicant.skills?.map((s, i) => (
-                    <span key={i} className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase">{s}</span>
+                  {applicant.skills?.map((skill) => (
+                    <span key={skill} className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase">{skill}</span>
                   )) || <span className="text-slate-300 text-xs italic">No skills listed</span>}
                 </div>
               </section>
@@ -238,7 +238,7 @@ function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClos
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -401,7 +401,7 @@ const ApplicationsTracking = () => {
             {job.applications?.map(app => {
               const profile = applicantProfiles[app.doctorId] || {};
               const reputation = applicantReputations[app.doctorId] || { averageRating: 0, count: 0 };
-              const isUpdating = updating && updating.startsWith(app.doctorId);
+              const isUpdating = updating?.startsWith(app.doctorId);
 
               return (
                 <tr key={app.doctorId} className="hover:bg-slate-50/40 transition-colors">

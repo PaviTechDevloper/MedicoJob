@@ -71,8 +71,8 @@ const Profile = () => {
       const token = localStorage.getItem('token');
       const updatedData = {
         ...formData,
-        skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
-        preferredLocations: formData.preferredLocations.split(',').map(l => l.trim()).filter(l => l)
+        skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
+        preferredLocations: formData.preferredLocations.split(',').map(l => l.trim()).filter(Boolean)
       };
 
       const res = await axios.put(`${API_BASE_URL}/auth/profile`, updatedData, {
