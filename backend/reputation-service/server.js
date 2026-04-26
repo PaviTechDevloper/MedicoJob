@@ -4,7 +4,24 @@ import cors from 'cors';
 import Review from './models/Review.js';
 
 const app = express();
-app.use(cors());
+app.disable('x-powered-by');
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Origin is not allowed by CORS'));
+  },
+}));
 app.use(express.json());
 
 // Log all requests for debugging
