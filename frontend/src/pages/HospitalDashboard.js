@@ -31,7 +31,7 @@ const HospitalDashboard = () => {
   };
 
   const handleDeleteJob = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) return;
+    if (!globalThis.confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) return;
     
     setDeletingId(id);
     try {

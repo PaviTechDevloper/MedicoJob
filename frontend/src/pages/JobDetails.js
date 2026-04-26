@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/api';
 import { AuthContext } from '../context/AuthContext';
-import { MapPin, DollarSign, Calendar, Building2, Briefcase, ArrowLeft, ShieldCheck, Clock, Share2, Heart, CheckCircle } from 'lucide-react';
+import { MapPin, Calendar, Building2, ArrowLeft, ShieldCheck, Clock, Share2, Heart, CheckCircle } from 'lucide-react';
 import { isWishlisted, toggleWishlist } from '../utils/wishlist';
 
 const JobDetails = () => {
@@ -98,6 +98,18 @@ const JobDetails = () => {
   const applicationStatusLabel = myApplication?.status
     ? `${myApplication.status.charAt(0).toUpperCase()}${myApplication.status.slice(1)}`
     : '';
+  let applyButtonContent = 'Submit Application';
+
+  if (applying) {
+    applyButtonContent = (
+      <div className="flex items-center justify-center gap-2">
+        <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+        Sending...
+      </div>
+    );
+  } else if (hasApplied) {
+    applyButtonContent = `Applied: ${applicationStatusLabel}`;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in">
@@ -251,12 +263,7 @@ const JobDetails = () => {
                   : 'btn-primary shadow-emerald-200 hover:shadow-emerald-300'
               }`}
             >
-              {applying ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Sending...
-                </div>
-              ) : hasApplied ? `Applied: ${applicationStatusLabel}` : 'Submit Application'}
+              {applyButtonContent}
             </button>
             
             {user?.role === 'hospital' && (
