@@ -1,7 +1,7 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const Review = require('./models/Review');
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import Review from './models/Review.js';
 
 const app = express();
 app.use(cors());
@@ -15,9 +15,12 @@ app.use((req, res, next) => {
 
 const MONGO_URI = process.env.MONGO_URI_REPUTATION || process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Reputation Service DB Connected'))
-  .catch(err => console.error('Reputation DB Connection Error:', err));
+try {
+  await mongoose.connect(MONGO_URI);
+  console.log('Reputation Service DB Connected');
+} catch (err) {
+  console.error('Reputation DB Connection Error:', err);
+}
 
 app.post('/reviews', async (req, res) => {
   try {
