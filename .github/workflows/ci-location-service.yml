@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: location-service
       service_path: backend/location-service
+      sonar_project_key: medicojob-location-service
     secrets: inherit

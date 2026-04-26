@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: api-gateway
       service_path: backend/api-gateway
+      sonar_project_key: medicojob-api-gateway
     secrets: inherit

@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: frontend
       service_path: frontend
+      sonar_project_key: medicojob-frontend
     secrets: inherit

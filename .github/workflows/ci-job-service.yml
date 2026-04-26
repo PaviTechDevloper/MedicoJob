@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: job-service
       service_path: backend/job-service
+      sonar_project_key: medicojob-job-service
     secrets: inherit

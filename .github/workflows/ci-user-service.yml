@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: user-service
       service_path: backend/user-service
+      sonar_project_key: medicojob-user-service
     secrets: inherit

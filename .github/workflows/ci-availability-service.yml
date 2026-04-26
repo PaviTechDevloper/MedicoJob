@@ -13,4 +13,5 @@ jobs:
     with:
       service_name: availability-service
       service_path: backend/availability-service
+      sonar_project_key: medicojob-availability-service
     secrets: inherit
