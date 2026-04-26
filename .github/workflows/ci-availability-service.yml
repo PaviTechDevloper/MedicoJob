@@ -1,18 +1,7 @@
 name: Availability Service Pipeline
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-    paths:
-      - "backend/availability-service/**"
-      - ".github/**"
-  push:
-    branches: [main]
-    paths:
-      - "backend/availability-service/**"
-      - ".github/**"
-  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: medicojob-availability-service-${{ github.repository }}-${{ github.ref }}
@@ -24,5 +13,4 @@ jobs:
     with:
       service_name: availability-service
       service_path: backend/availability-service
-      sonar_project_key: ${{ vars.SONAR_PROJECT_KEY_AVAILABILITY_SERVICE || vars.SONAR_PROJECT_KEY }}
     secrets: inherit

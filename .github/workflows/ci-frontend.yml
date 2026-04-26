@@ -1,18 +1,7 @@
 name: Frontend Pipeline
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/**"
-  push:
-    branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/**"
-  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: medicojob-frontend-${{ github.repository }}-${{ github.ref }}
@@ -24,5 +13,4 @@ jobs:
     with:
       service_name: frontend
       service_path: frontend
-      sonar_project_key: ${{ vars.SONAR_PROJECT_KEY_FRONTEND || vars.SONAR_PROJECT_KEY }}
     secrets: inherit

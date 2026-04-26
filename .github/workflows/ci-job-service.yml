@@ -1,18 +1,7 @@
 name: Job Service Pipeline
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-    paths:
-      - "backend/job-service/**"
-      - ".github/**"
-  push:
-    branches: [main]
-    paths:
-      - "backend/job-service/**"
-      - ".github/**"
-  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: medicojob-job-service-${{ github.repository }}-${{ github.ref }}
@@ -24,5 +13,4 @@ jobs:
     with:
       service_name: job-service
       service_path: backend/job-service
-      sonar_project_key: ${{ vars.SONAR_PROJECT_KEY_JOB_SERVICE || vars.SONAR_PROJECT_KEY }}
     secrets: inherit

@@ -28,7 +28,6 @@ on:
       notify_summary:
         description: "Notification summary"
         value: ${{ jobs.code-quality.outputs.notify_summary }}
-  workflow_dispatch:
 
 permissions:
   contents: read

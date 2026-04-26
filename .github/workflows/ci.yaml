@@ -1,10 +1,18 @@
-name: Medicojob Manual Pipeline
+name: Medicojob CI Pipeline
 
 on:
-  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 concurrency:
-  group: medicojob-${{ github.repository }}-${{ github.ref }}
+  group: medicojob-pr-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -12,74 +20,49 @@ permissions:
   pull-requests: read
 
 jobs:
-  get-email:
-    runs-on: ubuntu-latest
-    outputs:
-      email: ${{ steps.author.outputs.email }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - id: author
-        shell: bash
-        run: |
-          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
-          EMAIL=$(git show -s --format='%ae' "$SHA" || echo "")
-          echo "email=$EMAIL" >> "$GITHUB_OUTPUT"
-
-  sonar-scan:
-    uses: ./.github/workflows/ci_sonar_scan.yml
+  frontend:
+    name: Frontend
+    uses: ./.github/workflows/ci-frontend.yml
     secrets: inherit
 
-  snyk-scan:
-    needs: sonar-scan
-    if: ${{ needs.sonar-scan.outputs.quality_gate_status == 'PASSED' }}
-    uses: ./.github/workflows/ci_snyk_scan.yml
+  api-gateway:
+    name: API Gateway
+    needs: frontend
+    uses: ./.github/workflows/ci-api-gateway.yml
     secrets: inherit
 
-  notify:
-    needs:
-      - sonar-scan
-      - snyk-scan
-      - get-email
-    if: ${{ always() && (needs.sonar-scan.result == 'failure' || needs.sonar-scan.outputs.quality_gate_status == 'FAILED' || needs.snyk-scan.outputs.snyk_status == 'failure') }}
-    runs-on: ubuntu-latest
+  user-service:
+    name: User Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-user-service.yml
+    secrets: inherit
 
-    steps:
-      - uses: actions/checkout@v4
+  job-service:
+    name: Job Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-job-service.yml
+    secrets: inherit
 
-      - name: Sonar mail notification
-        if: ${{ needs.sonar-scan.result == 'failure' || needs.sonar-scan.outputs.quality_gate_status == 'FAILED' }}
-        uses: ./.github/actions/notification-action
-        with:
-          pipeline_name: ${{ github.workflow }}
-          repository_name: ${{ github.repository }}
-          failure_reason: ${{ needs.sonar-scan.outputs.notify_summary || 'SonarQube quality gate failed. Snyk scan was skipped.' }}
-          author: ${{ github.event.pull_request.user.login || github.actor }}
-          smtp_username: ${{ secrets.SMTP_USERNAME }}
-          smtp_password: ${{ secrets.SMTP_PASSWORD }}
-          smtp_server: ${{ secrets.SMTP_SERVER }}
-          smtp_port: ${{ secrets.SMTP_PORT || '587' }}
-          mail_from: ${{ secrets.MAIL_FROM }}
-          mail_to: ${{ secrets.MAIL_TO || needs.get-email.outputs.email }}
-          workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          report_url: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}/dashboard?id=${{ secrets.SONAR_PROJECT_KEY }}
+  matching-service:
+    name: Matching Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-matching-service.yml
+    secrets: inherit
 
-      - name: Snyk mail notification
-        if: ${{ needs.snyk-scan.outputs.snyk_status == 'failure' }}
-        uses: ./.github/actions/notification-action
-        with:
-          pipeline_name: ${{ github.workflow }}
-          repository_name: ${{ github.repository }}
-          failure_reason: ${{ needs.snyk-scan.outputs.notify_summary }}
-          author: ${{ github.event.pull_request.user.login || github.actor }}
-          smtp_username: ${{ secrets.SMTP_USERNAME }}
-          smtp_password: ${{ secrets.SMTP_PASSWORD }}
-          smtp_server: ${{ secrets.SMTP_SERVER }}
-          smtp_port: ${{ secrets.SMTP_PORT || '587' }}
-          mail_from: ${{ secrets.MAIL_FROM }}
-          mail_to: ${{ secrets.MAIL_TO || needs.get-email.outputs.email }}
-          workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          report_url: https://app.snyk.io/org/${{ secrets.SNYK_ORG }}/projects/${{ secrets.SNYK_PROJECT_ID }}
+  availability-service:
+    name: Availability Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-availability-service.yml
+    secrets: inherit
+
+  location-service:
+    name: Location Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-location-service.yml
+    secrets: inherit
+
+  reputation-service:
+    name: Reputation Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-reputation-service.yml
+    secrets: inherit

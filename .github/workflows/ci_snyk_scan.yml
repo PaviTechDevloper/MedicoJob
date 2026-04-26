@@ -18,7 +18,6 @@ on:
       notify_summary:
         description: "Snyk failure summary for notification"
         value: ${{ jobs.snyk-summary.outputs.notify_summary }}
-  workflow_dispatch:
 
 permissions:
   contents: read

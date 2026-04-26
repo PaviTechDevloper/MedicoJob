@@ -1,18 +1,7 @@
 name: API Gateway Pipeline
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-    paths:
-      - "backend/api-gateway/**"
-      - ".github/**"
-  push:
-    branches: [main]
-    paths:
-      - "backend/api-gateway/**"
-      - ".github/**"
-  workflow_dispatch:
+  workflow_call:
 
 concurrency:
   group: medicojob-api-gateway-${{ github.repository }}-${{ github.ref }}
@@ -24,5 +13,4 @@ jobs:
     with:
       service_name: api-gateway
       service_path: backend/api-gateway
-      sonar_project_key: ${{ vars.SONAR_PROJECT_KEY_API_GATEWAY || vars.SONAR_PROJECT_KEY }}
     secrets: inherit
