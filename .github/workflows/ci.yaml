@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/actions/**"
+      - ".github/workflows/ci.yaml"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/actions/**"
+      - ".github/workflows/ci.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  service-ci:
+    name: "${{ matrix.service }} ci"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: api-gateway
+            path: backend/api-gateway
+          - service: user-service
+            path: backend/user-service
+          - service: job-service
+            path: backend/job-service
+          - service: matching-service
+            path: backend/matching-service
+          - service: availability-service
+            path: backend/availability-service
+          - service: location-service
+            path: backend/location-service
+          - service: reputation-service
+            path: backend/reputation-service
+          - service: frontend
+            path: frontend
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.path }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests when available
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
+            CI=true npm test
+          else
+            echo "No test script found for ${{ matrix.service }}."
+          fi
+
+      - name: Build app when available
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
+            npm run build
+          else
+            echo "No build script found for ${{ matrix.service }}."
+          fi
+
+      - name: Notify
+        if: always()
+        uses: ./.github/actions/notification-action
+        with:
+          service: ${{ matrix.service }}
+          status: ${{ job.status }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
