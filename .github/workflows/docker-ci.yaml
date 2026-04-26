@@ -72,7 +72,8 @@ jobs:
     with:
       service_name: frontend
       service_path: frontend
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   api-gateway:
     name: API Gateway Docker
@@ -81,7 +82,8 @@ jobs:
     with:
       service_name: api-gateway
       service_path: backend/api-gateway
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   user-service:
     name: User Service Docker
@@ -90,7 +92,8 @@ jobs:
     with:
       service_name: user-service
       service_path: backend/user-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   job-service:
     name: Job Service Docker
@@ -99,7 +102,8 @@ jobs:
     with:
       service_name: job-service
       service_path: backend/job-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   matching-service:
     name: Matching Service Docker
@@ -108,7 +112,8 @@ jobs:
     with:
       service_name: matching-service
       service_path: backend/matching-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   availability-service:
     name: Availability Service Docker
@@ -117,7 +122,8 @@ jobs:
     with:
       service_name: availability-service
       service_path: backend/availability-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   location-service:
     name: Location Service Docker
@@ -126,7 +132,8 @@ jobs:
     with:
       service_name: location-service
       service_path: backend/location-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
   reputation-service:
     name: Reputation Service Docker
@@ -135,4 +142,5 @@ jobs:
     with:
       service_name: reputation-service
       service_path: backend/reputation-service
-    secrets: inherit
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
