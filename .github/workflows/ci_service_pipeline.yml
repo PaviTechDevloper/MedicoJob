@@ -1,11 +1,20 @@
-name: Medicojob Manual Pipeline
+name: Reusable Service Pipeline
 
 on:
-  workflow_dispatch:
-
-concurrency:
-  group: medicojob-${{ github.repository }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      service_name:
+        description: "Service name"
+        required: true
+        type: string
+      service_path:
+        description: "Service folder path"
+        required: true
+        type: string
+      sonar_project_key:
+        description: "SonarQube project key"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -29,21 +38,64 @@ jobs:
           EMAIL=$(git show -s --format='%ae' "$SHA" || echo "")
           echo "email=$EMAIL" >> "$GITHUB_OUTPUT"
 
+  service-ci:
+    name: "${{ inputs.service_name }} service ci"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.service_path }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ inputs.service_path }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests when available
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
+            CI=true npm test
+          else
+            echo "No test script found for ${{ inputs.service_name }}."
+          fi
+
+      - name: Build app when available
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
+            npm run build
+          else
+            echo "No build script found for ${{ inputs.service_name }}."
+          fi
+
   sonar-scan:
+    needs: service-ci
     uses: ./.github/workflows/ci_sonar_scan.yml
+    with:
+      service_name: ${{ inputs.service_name }}
+      service_path: ${{ inputs.service_path }}
+      sonar_project_key: ${{ inputs.sonar_project_key }}
     secrets: inherit
 
   snyk-scan:
     needs: sonar-scan
     if: ${{ needs.sonar-scan.outputs.quality_gate_status == 'PASSED' }}
     uses: ./.github/workflows/ci_snyk_scan.yml
+    with:
+      service_name: ${{ inputs.service_name }}
+      service_path: ${{ inputs.service_path }}
     secrets: inherit
 
   notify:
     needs:
+      - get-email
       - sonar-scan
       - snyk-scan
-      - get-email
     if: ${{ always() && (needs.sonar-scan.result == 'failure' || needs.sonar-scan.outputs.quality_gate_status == 'FAILED' || needs.snyk-scan.outputs.snyk_status == 'failure') }}
     runs-on: ubuntu-latest
 
@@ -65,7 +117,7 @@ jobs:
           mail_from: ${{ secrets.MAIL_FROM }}
           mail_to: ${{ secrets.MAIL_TO || needs.get-email.outputs.email }}
           workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          report_url: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}/dashboard?id=${{ secrets.SONAR_PROJECT_KEY }}
+          report_url: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}/dashboard?id=${{ inputs.sonar_project_key || vars.SONAR_PROJECT_KEY || secrets.SONAR_PROJECT_KEY }}
 
       - name: Snyk mail notification
         if: ${{ needs.snyk-scan.outputs.snyk_status == 'failure' }}

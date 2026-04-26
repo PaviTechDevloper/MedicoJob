@@ -2,6 +2,19 @@ name: Reusable Code Quality
 
 on:
   workflow_call:
+    inputs:
+      service_name:
+        description: "Service name"
+        required: true
+        type: string
+      service_path:
+        description: "Service folder path"
+        required: true
+        type: string
+      sonar_project_key:
+        description: "SonarQube project key"
+        required: false
+        type: string
     outputs:
       quality_gate_status:
         description: "SonarQube quality gate result"
@@ -56,7 +69,7 @@ jobs:
         continue-on-error: true
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_PROJECT_KEY: ${{ inputs.sonar_project_key || vars.SONAR_PROJECT_KEY || secrets.SONAR_PROJECT_KEY }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           if [ -z "$SONAR_HOST_URL" ]; then
@@ -92,8 +105,10 @@ jobs:
         id: sonar-scan
         continue-on-error: true
         with:
+          projectBaseDir: ${{ inputs.service_path }}
           args: >-
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectKey=${{ inputs.sonar_project_key || vars.SONAR_PROJECT_KEY || secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=${{ inputs.service_name }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -119,15 +134,15 @@ jobs:
           status="${{ steps.qg.outputs.quality-gate-status }}"
           if [ "${{ steps.validate-sonar.outcome }}" != "success" ]; then
             status="FAILED"
-            summary="SonarQube configuration is invalid. Check SONAR_HOST_URL, SONAR_PROJECT_KEY, and SONAR_TOKEN."
+            summary="SonarQube configuration is invalid for ${{ inputs.service_name }}. Check SONAR_HOST_URL, SONAR_PROJECT_KEY, and SONAR_TOKEN."
           elif [ "${{ steps.sonar-scan.outcome }}" != "success" ]; then
             status="FAILED"
-            summary="SonarQube scan failed. Review the workflow logs."
+            summary="SonarQube scan failed for ${{ inputs.service_name }}. Review the workflow logs."
           elif [ "$status" != "PASSED" ]; then
             status="FAILED"
-            summary="Code quality gate failed. Review SonarQube issues before continuing."
+            summary="Code quality gate failed for ${{ inputs.service_name }}. Review SonarQube issues before continuing."
           else
-            summary="Quality gate passed successfully."
+            summary="Quality gate passed successfully for ${{ inputs.service_name }}."
           fi
 
           echo "quality_gate_status=${status}" >> "$GITHUB_OUTPUT"

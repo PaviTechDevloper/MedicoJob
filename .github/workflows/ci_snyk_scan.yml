@@ -2,6 +2,15 @@ name: CI Snyk Scan
 
 on:
   workflow_call:
+    inputs:
+      service_name:
+        description: "Service name"
+        required: true
+        type: string
+      service_path:
+        description: "Service folder path"
+        required: true
+        type: string
     outputs:
       snyk_status:
         description: "success or failure"
@@ -16,35 +25,14 @@ permissions:
 
 jobs:
   snyk:
-    name: "${{ matrix.service }} snyk"
+    name: "${{ inputs.service_name }} snyk"
     runs-on: ubuntu-latest
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        include:
-          - service: api-gateway
-            path: backend/api-gateway
-          - service: user-service
-            path: backend/user-service
-          - service: job-service
-            path: backend/job-service
-          - service: matching-service
-            path: backend/matching-service
-          - service: availability-service
-            path: backend/availability-service
-          - service: location-service
-            path: backend/location-service
-          - service: reputation-service
-            path: backend/reputation-service
-          - service: frontend
-            path: frontend
 
     defaults:
       run:
-        working-directory: ${{ matrix.path }}
+        working-directory: ${{ inputs.service_path }}
 
     steps:
       - name: Checkout
@@ -58,9 +46,9 @@ jobs:
           if ! git cat-file -e "$base_sha^{commit}" 2>/dev/null; then
             base_sha="HEAD~1"
           fi
-          files=$(git diff --name-only "$base_sha" HEAD -- "${{ matrix.path }}" | sed 's/^/- /' || true)
+          files=$(git diff --name-only "$base_sha" HEAD -- "${{ inputs.service_path }}" | sed 's/^/- /' || true)
           if [ -z "$files" ]; then
-            files="- No changed files detected for ${{ matrix.service }}."
+            files="- No changed files detected for ${{ inputs.service_name }}."
           fi
           {
             echo "files<<EOF"
@@ -73,7 +61,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+          cache-dependency-path: ${{ inputs.service_path }}/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -107,20 +95,20 @@ jobs:
         shell: bash
         run: |
           status="success"
-          reason="Snyk passed for ${{ matrix.service }}."
+          reason="Snyk passed for ${{ inputs.service_name }}."
 
           if [ -z "${SNYK_TOKEN}" ]; then
             status="failure"
-            reason="SNYK_TOKEN is missing for ${{ matrix.service }}."
+            reason="SNYK_TOKEN is missing for ${{ inputs.service_name }}."
           elif [ "${{ steps.snyk-test.outcome }}" != "success" ]; then
             status="failure"
-            reason="Snyk found high-severity issues for ${{ matrix.service }}."
+            reason="Snyk found high-severity issues for ${{ inputs.service_name }}."
           fi
 
           mkdir -p "$GITHUB_WORKSPACE/snyk-results"
           {
             echo "STATUS=${status}"
-            echo "SERVICE=${{ matrix.service }}"
+            echo "SERVICE=${{ inputs.service_name }}"
             echo "SUMMARY<<SUMMARY_EOF"
             echo "${reason}"
             echo ""
@@ -135,15 +123,15 @@ jobs:
           ISSUES
             echo ""
             echo "Dependency manifest checked:"
-            echo "- ${{ matrix.path }}/package-lock.json"
+            echo "- ${{ inputs.service_path }}/package-lock.json"
             echo "SUMMARY_EOF"
-          } > "$GITHUB_WORKSPACE/snyk-results/${{ matrix.service }}.env"
+          } > "$GITHUB_WORKSPACE/snyk-results/${{ inputs.service_name }}.env"
 
       - name: Upload Snyk result
         uses: actions/upload-artifact@v4
         with:
-          name: snyk-result-${{ matrix.service }}
-          path: snyk-results/${{ matrix.service }}.env
+          name: snyk-result-${{ inputs.service_name }}
+          path: snyk-results/${{ inputs.service_name }}.env
 
   snyk-summary:
     name: Snyk summary
