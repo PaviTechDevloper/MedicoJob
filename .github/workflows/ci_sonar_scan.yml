@@ -84,6 +84,8 @@ jobs:
             exit 1
           fi
 
+          
+
       - name: Scan using SonarQube
         if: ${{ steps.validate-sonar.outcome == 'success' }}
         uses: SonarSource/sonarqube-scan-action@v7.1.0
