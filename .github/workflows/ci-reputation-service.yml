@@ -14,4 +14,5 @@ jobs:
       service_name: reputation-service
       service_path: backend/reputation-service
       sonar_project_key: medicojob-reputation-service
+      sonar_token_secret_name: SONAR_TOKEN_REPUTATION_SERVICE
     secrets: inherit

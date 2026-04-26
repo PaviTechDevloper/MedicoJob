@@ -15,6 +15,10 @@ on:
         description: "SonarQube project key"
         required: false
         type: string
+      sonar_token_secret_name:
+        description: "GitHub secret name containing the SonarQube token"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -80,6 +84,7 @@ jobs:
       service_name: ${{ inputs.service_name }}
       service_path: ${{ inputs.service_path }}
       sonar_project_key: ${{ inputs.sonar_project_key }}
+      sonar_token_secret_name: ${{ inputs.sonar_token_secret_name }}
     secrets: inherit
 
   snyk-scan:

@@ -14,4 +14,5 @@ jobs:
       service_name: matching-service
       service_path: backend/matching-service
       sonar_project_key: medicojob-matching-service
+      sonar_token_secret_name: SONAR_TOKEN_MATCHING_SERVICE
     secrets: inherit
