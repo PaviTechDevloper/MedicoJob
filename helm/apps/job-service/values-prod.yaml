@@ -1,0 +1,23 @@
+namespace: prod
+name: job-service
+replicaCount: 2
+image:
+  repository: pavithrasambath2003/job-service
+  tag: v1
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 5002
+containerPort: 5002
+env:
+  PORT: "5002"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /jobs
+    - /socket.io
+serviceAccount:
+  create: true
+job:
+  enabled: false

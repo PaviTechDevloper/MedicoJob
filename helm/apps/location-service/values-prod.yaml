@@ -1,0 +1,23 @@
+namespace: prod
+name: location-service
+replicaCount: 2
+image:
+  repository: pavithrasambath2003/location-service
+  tag: v1
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 5005
+containerPort: 5005
+env:
+  PORT: "5005"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /location
+    - /nearby
+serviceAccount:
+  create: true
+job:
+  enabled: false
