@@ -6,16 +6,9 @@ on:
       - closed
     branches:
       - master
-  workflow_run:
-    workflows:
-      - Medicojob CI Pipeline
-    types:
-      - completed
-    branches:
-      - master
 
 concurrency:
-  group: medicojob-docker-${{ github.repository }}-${{ github.event.pull_request.number || github.event.workflow_run.id || github.run_id }}
+  group: medicojob-docker-${{ github.repository }}-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 permissions:
@@ -28,7 +21,7 @@ permissions:
 jobs:
   verify-release:
     name: Verify merged PR and CI
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')) }}
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -37,13 +30,6 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-
-            if (context.eventName === 'workflow_run') {
-              const run = context.payload.workflow_run;
-              core.info(`CI passed: ${run.html_url}`);
-              return;
-            }
-
             const headSha = context.payload.pull_request.head.sha;
 
             const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
@@ -73,7 +59,7 @@ jobs:
       service_name: frontend
       service_path: frontend
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   api-gateway:
     name: API Gateway Docker
@@ -83,7 +69,7 @@ jobs:
       service_name: api-gateway
       service_path: backend/api-gateway
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   user-service:
     name: User Service Docker
@@ -93,7 +79,7 @@ jobs:
       service_name: user-service
       service_path: backend/user-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   job-service:
     name: Job Service Docker
@@ -103,7 +89,7 @@ jobs:
       service_name: job-service
       service_path: backend/job-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   matching-service:
     name: Matching Service Docker
@@ -113,7 +99,7 @@ jobs:
       service_name: matching-service
       service_path: backend/matching-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   availability-service:
     name: Availability Service Docker
@@ -123,7 +109,7 @@ jobs:
       service_name: availability-service
       service_path: backend/availability-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   location-service:
     name: Location Service Docker
@@ -133,7 +119,7 @@ jobs:
       service_name: location-service
       service_path: backend/location-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   reputation-service:
     name: Reputation Service Docker
@@ -143,4 +129,4 @@ jobs:
       service_name: reputation-service
       service_path: backend/reputation-service
     secrets:
-      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

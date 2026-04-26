@@ -5,11 +5,11 @@ on:
     types:
       - opened
       - synchronize
+      - reopened
+      - ready_for_review
     branches:
       - master
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 concurrency:
   group: medicojob-pr-${{ github.repository }}-${{ github.ref }}
