@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/PaviTechDevloper/MedicoJob.git
     targetRevision: main
-    path: opslora-helm/apps/reputation-service
+    path: helm/apps/reputation-service
     helm:
       valueFiles:
         - values-dev.yaml

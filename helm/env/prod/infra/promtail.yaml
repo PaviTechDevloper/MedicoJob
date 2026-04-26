@@ -8,7 +8,10 @@ spec:
   source:
     repoURL: https://github.com/PaviTechDevloper/MedicoJob.git
     targetRevision: main
-    path: opslora-helm/infra/promtail
+    path: helm/infra/promtail
+    helm:
+      valueFiles:
+        - values-prod.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: prod

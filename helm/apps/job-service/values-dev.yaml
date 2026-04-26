@@ -2,13 +2,20 @@ namespace: dev
 name: job-service
 replicaCount: 1
 image:
-  repository: pavithrasambath2003/job-service
-  tag: v1
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.job_service
+  tag: latest
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 5002
 containerPort: 5002
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   PORT: "5002"
 httpRoute:

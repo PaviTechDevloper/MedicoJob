@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/PaviTechDevloper/MedicoJob.git
     targetRevision: main
-    path: opslora-helm/apps/matching-service
+    path: helm/apps/matching-service
     helm:
       valueFiles:
         - values-prod.yaml

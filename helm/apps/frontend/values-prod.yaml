@@ -2,13 +2,20 @@ namespace: prod
 name: frontend
 replicaCount: 2
 image:
-  repository: pavithrasambath2003/frontend
-  tag: v2
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.frontend
+  tag: latest
   pullPolicy: Always
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 3000
 containerPort: 3000
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   HOST: "0.0.0.0"
   PORT: "3000"

@@ -2,13 +2,20 @@ namespace: dev
 name: location-service
 replicaCount: 1
 image:
-  repository: pavithrasambath2003/location-service
-  tag: v1
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.location_service
+  tag: latest
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 5005
 containerPort: 5005
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   PORT: "5005"
 httpRoute:

@@ -2,13 +2,20 @@ namespace: dev
 name: matching-service
 replicaCount: 1
 image:
-  repository: pavithrasambath2003/matching-service
-  tag: v1
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.matching_service
+  tag: latest
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 5003
 containerPort: 5003
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   PORT: "5003"
 httpRoute:

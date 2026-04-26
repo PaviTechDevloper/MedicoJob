@@ -2,13 +2,20 @@ namespace: prod
 name: availability-service
 replicaCount: 2
 image:
-  repository: pavithrasambath2003/availability-service
-  tag: v1
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.availability_service
+  tag: latest
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 5004
 containerPort: 5004
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   PORT: "5004"
 httpRoute:

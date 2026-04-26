@@ -2,13 +2,20 @@ namespace: prod
 name: reputation-service
 replicaCount: 2
 image:
-  repository: pavithrasambath2003/reputation-service
-  tag: v1
+  repository: ghcr.io/pavitechdevloper/pavitechdevloper.reputation_service
+  tag: latest
   pullPolicy: IfNotPresent
+imagePullSecrets: []
 service:
   type: ClusterIP
   port: 5006
 containerPort: 5006
+configMap:
+  enabled: true
+  name: medicojob-config
+secret:
+  enabled: true
+  name: medicojob-secrets
 env:
   PORT: "5006"
 httpRoute:

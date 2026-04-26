@@ -16,6 +16,10 @@ spec:
         app: {{ .Values.name }}
     spec:
       serviceAccountName: {{ .Values.name }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ .Values.name }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -38,7 +42,11 @@ spec:
           value: {{ $value | quote }}
         {{- end }}
         envFrom:
+        {{- if .Values.configMap.enabled }}
         - configMapRef:
-            name: medicojob-config
+            name: {{ .Values.configMap.name }}
+        {{- end }}
+        {{- if .Values.secret.enabled }}
         - secretRef:
-            name: medicojob-secrets
+            name: {{ .Values.secret.name }}
+        {{- end }}

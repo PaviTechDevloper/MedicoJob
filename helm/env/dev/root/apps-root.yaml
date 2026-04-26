@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/PaviTechDevloper/MedicoJob.git
     targetRevision: main
-    path: opslora-helm/env/dev/apps
+    path: helm/env/dev/apps
     directory:
       recurse: true
   destination:
