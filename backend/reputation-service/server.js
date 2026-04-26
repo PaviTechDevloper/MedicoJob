@@ -1,10 +1,27 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const Review = require('./models/Review');
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import Review from './models/Review.js';
 
 const app = express();
-app.use(cors());
+app.disable('x-powered-by');
+const allowedOrigins = new Set(
+  (process.env.CORS_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Origin is not allowed by CORS'));
+  },
+}));
 app.use(express.json());
 
 // Log all requests for debugging
@@ -15,9 +32,12 @@ app.use((req, res, next) => {
 
 const MONGO_URI = process.env.MONGO_URI_REPUTATION || process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('Reputation Service DB Connected'))
-  .catch(err => console.error('Reputation DB Connection Error:', err));
+try {
+  await mongoose.connect(MONGO_URI);
+  console.log('Reputation Service DB Connected');
+} catch (err) {
+  console.error('Reputation DB Connection Error:', err);
+}
 
 app.post('/reviews', async (req, res) => {
   try {

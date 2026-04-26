@@ -1,0 +1,18 @@
+name: Reputation Service Pipeline
+
+on:
+  workflow_call:
+
+concurrency:
+  group: medicojob-reputation-service-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/ci_service_pipeline.yml
+    with:
+      service_name: reputation-service
+      service_path: backend/reputation-service
+      sonar_project_key: medicojob-reputation-service
+      sonar_token_secret_name: SONAR_TOKEN_REPUTATION_SERVICE
+    secrets: inherit

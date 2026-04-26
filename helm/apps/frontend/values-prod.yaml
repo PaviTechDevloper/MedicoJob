@@ -1,0 +1,24 @@
+namespace: prod
+name: frontend
+replicaCount: 2
+image:
+  repository: pavithrasambath2003/frontend
+  tag: v2
+  pullPolicy: Always
+service:
+  type: ClusterIP
+  port: 3000
+containerPort: 3000
+env:
+  HOST: "0.0.0.0"
+  PORT: "3000"
+  REACT_APP_API_URL: "http://api-gateway:5000"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /
+serviceAccount:
+  create: true
+job:
+  enabled: false

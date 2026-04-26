@@ -1,0 +1,18 @@
+name: Frontend Pipeline
+
+on:
+  workflow_call:
+
+concurrency:
+  group: medicojob-frontend-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/ci_service_pipeline.yml
+    with:
+      service_name: frontend
+      service_path: frontend
+      sonar_project_key: medicojob-frontend
+      sonar_token_secret_name: SONAR_TOKEN_FRONTEND
+    secrets: inherit

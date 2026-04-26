@@ -1,0 +1,22 @@
+namespace: dev
+name: matching-service
+replicaCount: 1
+image:
+  repository: pavithrasambath2003/matching-service
+  tag: v1
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 5003
+containerPort: 5003
+env:
+  PORT: "5003"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /match
+serviceAccount:
+  create: true
+job:
+  enabled: false

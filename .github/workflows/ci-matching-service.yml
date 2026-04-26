@@ -1,0 +1,18 @@
+name: Matching Service Pipeline
+
+on:
+  workflow_call:
+
+concurrency:
+  group: medicojob-matching-service-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    uses: ./.github/workflows/ci_service_pipeline.yml
+    with:
+      service_name: matching-service
+      service_path: backend/matching-service
+      sonar_project_key: medicojob-matching-service
+      sonar_token_secret_name: SONAR_TOKEN_MATCHING_SERVICE
+    secrets: inherit

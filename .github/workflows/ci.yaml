@@ -1,92 +1,68 @@
-name: CI
+name: Medicojob CI Pipeline
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - main
-      - develop
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - ".github/actions/**"
-      - ".github/workflows/ci.yaml"
   push:
     branches:
       - main
-      - develop
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - ".github/actions/**"
-      - ".github/workflows/ci.yaml"
-  workflow_dispatch:
+
+concurrency:
+  group: medicojob-pr-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
-  service-ci:
-    name: "${{ matrix.service }} ci"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - service: api-gateway
-            path: backend/api-gateway
-          - service: user-service
-            path: backend/user-service
-          - service: job-service
-            path: backend/job-service
-          - service: matching-service
-            path: backend/matching-service
-          - service: availability-service
-            path: backend/availability-service
-          - service: location-service
-            path: backend/location-service
-          - service: reputation-service
-            path: backend/reputation-service
-          - service: frontend
-            path: frontend
+  frontend:
+    name: Frontend
+    uses: ./.github/workflows/ci-frontend.yml
+    secrets: inherit
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.path }}
+  api-gateway:
+    name: API Gateway
+    needs: frontend
+    uses: ./.github/workflows/ci-api-gateway.yml
+    secrets: inherit
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  user-service:
+    name: User Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-user-service.yml
+    secrets: inherit
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+  job-service:
+    name: Job Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-job-service.yml
+    secrets: inherit
 
-      - name: Install dependencies
-        run: npm ci
+  matching-service:
+    name: Matching Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-matching-service.yml
+    secrets: inherit
 
-      - name: Run tests when available
-        run: |
-          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
-            CI=true npm test
-          else
-            echo "No test script found for ${{ matrix.service }}."
-          fi
+  availability-service:
+    name: Availability Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-availability-service.yml
+    secrets: inherit
 
-      - name: Build app when available
-        run: |
-          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
-            npm run build
-          else
-            echo "No build script found for ${{ matrix.service }}."
-          fi
+  location-service:
+    name: Location Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-location-service.yml
+    secrets: inherit
 
-      - name: Notify
-        if: always()
-        uses: ./.github/actions/notification-action
-        with:
-          service: ${{ matrix.service }}
-          status: ${{ job.status }}
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+  reputation-service:
+    name: Reputation Service
+    needs: api-gateway
+    uses: ./.github/workflows/ci-reputation-service.yml
+    secrets: inherit

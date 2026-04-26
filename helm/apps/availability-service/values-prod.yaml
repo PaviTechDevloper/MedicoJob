@@ -1,0 +1,22 @@
+namespace: prod
+name: availability-service
+replicaCount: 2
+image:
+  repository: pavithrasambath2003/availability-service
+  tag: v1
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 5004
+containerPort: 5004
+env:
+  PORT: "5004"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /availability
+serviceAccount:
+  create: true
+job:
+  enabled: false

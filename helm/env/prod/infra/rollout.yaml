@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-rollout
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/PaviTechDevloper/MedicoJob.git
+    targetRevision: main
+    path: opslora-helm/infra/rollout
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

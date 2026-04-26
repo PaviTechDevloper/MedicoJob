@@ -1,0 +1,22 @@
+namespace: prod
+name: user-service
+replicaCount: 2
+image:
+  repository: pavithrasambath2003/user-service
+  tag: v1
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 5001
+containerPort: 5001
+env:
+  PORT: "5001"
+httpRoute:
+  enabled: true
+  gatewayName: medicojob-gateway
+  paths:
+    - /auth
+serviceAccount:
+  create: true
+job:
+  enabled: false
