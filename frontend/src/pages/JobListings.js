@@ -164,10 +164,11 @@ const JobListings = () => {
             <div className="space-y-6">
               {/* Search */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Keywords</label>
+                <label htmlFor="job-search" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Keywords</label>
                 <div className="relative group">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input
+                    id="job-search"
                     type="text"
                     placeholder="Title, keywords..."
                     value={filters.search}
@@ -179,9 +180,10 @@ const JobListings = () => {
 
               {/* Specialization */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specialization</label>
+                <label htmlFor="job-specialization" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specialization</label>
                 <div className="relative">
                   <select
+                    id="job-specialization"
                     value={filters.specialization}
                     onChange={(e) => updateFilter('specialization', e.target.value)}
                     className="w-full pl-4 pr-10 py-3.5 bg-slate-50 border-2 border-slate-50 rounded-2xl text-sm font-bold focus:bg-white focus:border-emerald-100 outline-none transition-all appearance-none cursor-pointer"
@@ -195,10 +197,11 @@ const JobListings = () => {
 
               {/* Location */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Location</label>
+                <label htmlFor="job-location" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Location</label>
                 <div className="relative group">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input
+                    id="job-location"
                     type="text"
                     placeholder="City or state..."
                     value={filters.location}
@@ -210,10 +213,11 @@ const JobListings = () => {
 
               {/* Salary */}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min Salary (Annual)</label>
+                <label htmlFor="job-min-salary" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min Salary (Annual)</label>
                 <div className="relative group">
                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input
+                    id="job-min-salary"
                     type="number"
                     placeholder="e.g. 500000"
                     value={filters.minSalary}

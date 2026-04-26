@@ -20,19 +20,12 @@ const STATUS_STYLES = {
 function FeedbackModal({ type, onConfirm, onCancel }) {
   const [text, setText] = useState('');
   const isReject = type === 'rejected';
-  const handleBackdropKeyDown = (event) => {
-    if (event.key === 'Escape') {
-      onCancel();
-    }
-  };
 
   return (
     <div
       className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
       role="dialog"
       aria-modal="true"
-      tabIndex={-1}
-      onKeyDown={handleBackdropKeyDown}
     >
       <div className="bg-white rounded-[2rem] max-w-md w-full shadow-2xl p-8">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${isReject ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
@@ -87,11 +80,6 @@ function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClos
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const handleBackdropKeyDown = (event) => {
-    if (event.key === 'Escape') {
-      onClose();
-    }
-  };
 
   if (!applicant) return null;
 
@@ -133,8 +121,6 @@ function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClos
       className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
       role="dialog"
       aria-modal="true"
-      tabIndex={-1}
-      onKeyDown={handleBackdropKeyDown}
     >
       <div
         className="bg-white rounded-[2.5rem] max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col md:flex-row h-full max-h-[90vh]"

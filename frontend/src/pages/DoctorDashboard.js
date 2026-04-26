@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/api';
 import { AuthContext } from '../context/AuthContext';
@@ -218,6 +219,14 @@ const StatCard = ({ icon, label, value, color, bg }) => (
   </div>
 );
 
+StatCard.propTypes = {
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
+  color: PropTypes.string.isRequired,
+  bg: PropTypes.string.isRequired,
+};
+
 const TabButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
@@ -228,5 +237,11 @@ const TabButton = ({ active, onClick, children }) => (
     {children}
   </button>
 );
+
+TabButton.propTypes = {
+  active: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+  children: PropTypes.node.isRequired,
+};
 
 export default DoctorDashboard;
