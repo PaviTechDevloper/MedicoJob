@@ -1,6 +1,14 @@
 name: CI Snyk Scan
 
 on:
+  workflow_call:
+    outputs:
+      snyk_status:
+        description: "success or failure"
+        value: ${{ jobs.snyk-summary.outputs.snyk_status }}
+      notify_summary:
+        description: "Snyk failure summary for notification"
+        value: ${{ jobs.snyk-summary.outputs.notify_summary }}
   workflow_dispatch:
 
 permissions:
@@ -14,6 +22,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - service: api-gateway
@@ -41,6 +50,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Collect changed files
+        id: changed-files
+        shell: bash
+        run: |
+          base_sha="${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }}"
+          if ! git cat-file -e "$base_sha^{commit}" 2>/dev/null; then
+            base_sha="HEAD~1"
+          fi
+          files=$(git diff --name-only "$base_sha" HEAD -- "${{ matrix.path }}" | sed 's/^/- /' || true)
+          if [ -z "$files" ]; then
+            files="- No changed files detected for ${{ matrix.service }}."
+          fi
+          {
+            echo "files<<EOF"
+            echo "$files"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -51,29 +78,107 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Snyk test
+      - name: Install Snyk CLI
         if: ${{ env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --file=${{ matrix.path }}/package-lock.json --severity-threshold=high
+        run: npm install --global snyk
 
-      - name: Skip Snyk test
-        if: ${{ env.SNYK_TOKEN == '' }}
-        run: echo "SNYK_TOKEN is not configured; skipping Snyk scan."
+      - name: Run Snyk test
+        id: snyk-test
+        if: ${{ env.SNYK_TOKEN != '' }}
+        continue-on-error: true
+        run: snyk test --file=package-lock.json --severity-threshold=high --json-file-output=snyk-results.json
 
-      - name: Notify
-        if: always()
-        uses: ./.github/actions/notification-action
+      - name: Collect Snyk issue details
+        id: snyk-issues
+        if: ${{ env.SNYK_TOKEN != '' && steps.snyk-test.outcome == 'failure' }}
+        shell: bash
+        run: |
+          issues=$(jq -r '.vulnerabilities[]? | "- " + .packageName + "@" + .version + " [" + .severity + "] " + .title' snyk-results.json | head -20 || true)
+          if [ -z "$issues" ]; then
+            issues="- Snyk issue details unavailable. Open the workflow run for full results."
+          fi
+          {
+            echo "issues<<EOF"
+            echo "$issues"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Write Snyk result
+        shell: bash
+        run: |
+          status="success"
+          reason="Snyk passed for ${{ matrix.service }}."
+
+          if [ -z "${SNYK_TOKEN}" ]; then
+            status="failure"
+            reason="SNYK_TOKEN is missing for ${{ matrix.service }}."
+          elif [ "${{ steps.snyk-test.outcome }}" != "success" ]; then
+            status="failure"
+            reason="Snyk found high-severity issues for ${{ matrix.service }}."
+          fi
+
+          mkdir -p "$GITHUB_WORKSPACE/snyk-results"
+          {
+            echo "STATUS=${status}"
+            echo "SERVICE=${{ matrix.service }}"
+            echo "SUMMARY<<SUMMARY_EOF"
+            echo "${reason}"
+            echo ""
+            echo "Changed files:"
+            cat <<'FILES'
+          ${{ steps.changed-files.outputs.files }}
+          FILES
+            echo ""
+            echo "Vulnerable packages:"
+            cat <<'ISSUES'
+          ${{ steps.snyk-issues.outputs.issues }}
+          ISSUES
+            echo ""
+            echo "Dependency manifest checked:"
+            echo "- ${{ matrix.path }}/package-lock.json"
+            echo "SUMMARY_EOF"
+          } > "$GITHUB_WORKSPACE/snyk-results/${{ matrix.service }}.env"
+
+      - name: Upload Snyk result
+        uses: actions/upload-artifact@v4
         with:
-          service: ${{ matrix.service }} snyk scan
-          status: ${{ job.status }}
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          email-to: ${{ secrets.NOTIFICATION_EMAIL_TO }}
-          email-from: ${{ secrets.NOTIFICATION_EMAIL_FROM }}
-          smtp-server: ${{ secrets.SMTP_SERVER }}
-          smtp-port: ${{ secrets.SMTP_PORT || '587' }}
-          smtp-username: ${{ secrets.SMTP_USERNAME }}
-          smtp-password: ${{ secrets.SMTP_PASSWORD }}
+          name: snyk-result-${{ matrix.service }}
+          path: snyk-results/${{ matrix.service }}.env
+
+  snyk-summary:
+    name: Snyk summary
+    runs-on: ubuntu-latest
+    needs: snyk
+    if: always()
+    outputs:
+      snyk_status: ${{ steps.summary.outputs.snyk_status }}
+      notify_summary: ${{ steps.summary.outputs.notify_summary }}
+
+    steps:
+      - name: Download Snyk results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: snyk-result-*
+          path: snyk-results
+          merge-multiple: true
+
+      - name: Build Snyk summary
+        id: summary
+        shell: bash
+        run: |
+          status="success"
+          if grep -R "^STATUS=failure" snyk-results >/dev/null 2>&1; then
+            status="failure"
+          fi
+
+          {
+            echo "snyk_status=${status}"
+            echo "notify_summary<<EOF"
+            awk '
+              /^SERVICE=/ { service=substr($0,9); next }
+              /^SUMMARY<<SUMMARY_EOF/ { capture=1; print "Service: " service; next }
+              /^SUMMARY_EOF/ { capture=0; print ""; next }
+              capture { print }
+            ' snyk-results/*.env
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"

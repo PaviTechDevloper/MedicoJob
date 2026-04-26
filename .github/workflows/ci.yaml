@@ -1,92 +1,92 @@
-name: CI
+name: Medicojob Pipeline
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - main
       - develop
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - ".github/actions/**"
-      - ".github/workflows/ci.yaml"
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - ".github/actions/**"
-      - ".github/workflows/ci.yaml"
   workflow_dispatch:
+
+concurrency:
+  group: medicojob-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
-  service-ci:
-    name: "${{ matrix.service }} ci"
+  get-email:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - service: api-gateway
-            path: backend/api-gateway
-          - service: user-service
-            path: backend/user-service
-          - service: job-service
-            path: backend/job-service
-          - service: matching-service
-            path: backend/matching-service
-          - service: availability-service
-            path: backend/availability-service
-          - service: location-service
-            path: backend/location-service
-          - service: reputation-service
-            path: backend/reputation-service
-          - service: frontend
-            path: frontend
-
-    defaults:
-      run:
-        working-directory: ${{ matrix.path }}
+    outputs:
+      email: ${{ steps.author.outputs.email }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests when available
+      - id: author
+        shell: bash
         run: |
-          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)"; then
-            CI=true npm test
-          else
-            echo "No test script found for ${{ matrix.service }}."
-          fi
+          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          EMAIL=$(git show -s --format='%ae' "$SHA" || echo "")
+          echo "email=$EMAIL" >> "$GITHUB_OUTPUT"
 
-      - name: Build app when available
-        run: |
-          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
-            npm run build
-          else
-            echo "No build script found for ${{ matrix.service }}."
-          fi
+  sonar-scan:
+    uses: ./.github/workflows/ci_sonar_scan.yml
+    secrets: inherit
 
-      - name: Notify
-        if: always()
+  snyk-scan:
+    needs: sonar-scan
+    if: ${{ needs.sonar-scan.outputs.quality_gate_status == 'PASSED' }}
+    uses: ./.github/workflows/ci_snyk_scan.yml
+    secrets: inherit
+
+  notify:
+    needs:
+      - sonar-scan
+      - snyk-scan
+      - get-email
+    if: ${{ always() && (needs.sonar-scan.result == 'failure' || needs.sonar-scan.outputs.quality_gate_status == 'FAILED' || needs.snyk-scan.outputs.snyk_status == 'failure') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sonar mail notification
+        if: ${{ needs.sonar-scan.result == 'failure' || needs.sonar-scan.outputs.quality_gate_status == 'FAILED' }}
         uses: ./.github/actions/notification-action
         with:
-          service: ${{ matrix.service }}
-          status: ${{ job.status }}
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          pipeline_name: ${{ github.workflow }}
+          repository_name: ${{ github.repository }}
+          failure_reason: ${{ needs.sonar-scan.outputs.notify_summary || 'SonarQube quality gate failed. Snyk scan was skipped.' }}
+          author: ${{ github.event.pull_request.user.login || github.actor }}
+          smtp_username: ${{ secrets.SMTP_USERNAME }}
+          smtp_password: ${{ secrets.SMTP_PASSWORD }}
+          smtp_server: ${{ secrets.SMTP_SERVER }}
+          smtp_port: ${{ secrets.SMTP_PORT || '587' }}
+          mail_from: ${{ secrets.MAIL_FROM }}
+          mail_to: ${{ secrets.MAIL_TO || needs.get-email.outputs.email }}
+          workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          report_url: ${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}/dashboard?id=${{ secrets.SONAR_PROJECT_KEY }}
+
+      - name: Snyk mail notification
+        if: ${{ needs.snyk-scan.outputs.snyk_status == 'failure' }}
+        uses: ./.github/actions/notification-action
+        with:
+          pipeline_name: ${{ github.workflow }}
+          repository_name: ${{ github.repository }}
+          failure_reason: ${{ needs.snyk-scan.outputs.notify_summary }}
+          author: ${{ github.event.pull_request.user.login || github.actor }}
+          smtp_username: ${{ secrets.SMTP_USERNAME }}
+          smtp_password: ${{ secrets.SMTP_PASSWORD }}
+          smtp_server: ${{ secrets.SMTP_SERVER }}
+          smtp_port: ${{ secrets.SMTP_PORT || '587' }}
+          mail_from: ${{ secrets.MAIL_FROM }}
+          mail_to: ${{ secrets.MAIL_TO || needs.get-email.outputs.email }}
+          workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          report_url: https://app.snyk.io/org/${{ secrets.SNYK_ORG }}/projects/${{ secrets.SNYK_PROJECT_ID }}
