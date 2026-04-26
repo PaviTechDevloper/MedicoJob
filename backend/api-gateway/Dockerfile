@@ -14,8 +14,9 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY --from=deps --chown=node:node --chmod=0555 /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --chmod=0555 . .
+
 
 USER node
 
