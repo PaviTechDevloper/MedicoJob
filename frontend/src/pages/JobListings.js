@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../apiConfig';
 import JobCard from '../components/JobCard';
 import {
   Search, MapPin, Briefcase, DollarSign, Filter, X,
-  ChevronDown, SlidersHorizontal, Trash2, Map, Navigation
+  ChevronDown, SlidersHorizontal, Trash2, Map, Navigation, Clock
 } from 'lucide-react';
 import { debounce } from 'lodash';
 
@@ -31,16 +32,16 @@ const JobListings = () => {
   const fetchJobs = useCallback(async (currentFilters, isNearby = false, coords = null) => {
     setLoading(true);
     try {
-      let url = 'http://localhost:5000/jobs';
+      let url = `${API_BASE_URL}/jobs`;
 
       // If nearby mode is active, we use the location service (Port 5005)
       if (isNearby && coords) {
-        url = `http://localhost:5000/nearby/jobs?lat=${coords.lat}&lng=${coords.lng}&distance=50000`; // 50km radius
+        url = `${API_BASE_URL}/nearby/jobs?lat=${coords.lat}&lng=${coords.lng}&distance=50000`; // 50km radius
         const res = await axios.get(url);
         // Location service returns location objects, we need to fetch the actual jobs
         const jobIds = res.data.map(l => l.entityId);
         if (jobIds.length > 0) {
-          const jobsRes = await axios.get('http://localhost:5000/jobs');
+          const jobsRes = await axios.get(`${API_BASE_URL}/jobs`);
           setJobs(jobsRes.data.filter(j => jobIds.includes(j._id)));
         } else {
           setJobs([]);

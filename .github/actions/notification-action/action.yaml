@@ -1,0 +1,78 @@
+name: "Notification"
+description: "Send optional Slack and email notifications for workflow results"
+
+inputs:
+  status:
+    description: "Workflow status"
+    required: true
+  service:
+    description: "Service name or workflow name"
+    required: true
+  webhook-url:
+    description: "Slack incoming webhook URL"
+    required: false
+  email-to:
+    description: "Email recipient"
+    required: false
+  email-from:
+    description: "Email sender"
+    required: false
+  smtp-server:
+    description: "SMTP server host"
+    required: false
+  smtp-port:
+    description: "SMTP server port"
+    required: false
+    default: "587"
+  smtp-username:
+    description: "SMTP username"
+    required: false
+  smtp-password:
+    description: "SMTP password"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Send Slack notification
+      if: ${{ inputs.webhook-url != '' }}
+      shell: bash
+      run: |
+        payload=$(cat <<JSON
+        {
+          "text": "Medicojob CI: ${{ inputs.service }} finished with status: ${{ inputs.status }} on ${{ github.ref_name }} (${GITHUB_SHA::7})"
+        }
+        JSON
+        )
+        curl -X POST -H "Content-Type: application/json" --data "$payload" "${{ inputs.webhook-url }}"
+
+    - name: Skip notification
+      if: ${{ inputs.webhook-url == '' }}
+      shell: bash
+      run: echo "SLACK_WEBHOOK_URL is not configured; skipping notification."
+
+    - name: Send email notification
+      if: ${{ inputs.email-to != '' && inputs.email-from != '' && inputs.smtp-server != '' && inputs.smtp-port != '' && inputs.smtp-username != '' && inputs.smtp-password != '' }}
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ inputs.smtp-server }}
+        server_port: ${{ inputs.smtp-port }}
+        username: ${{ inputs.smtp-username }}
+        password: ${{ inputs.smtp-password }}
+        subject: "Medicojob CI: ${{ inputs.service }} ${{ inputs.status }}"
+        to: ${{ inputs.email-to }}
+        from: ${{ inputs.email-from }}
+        body: |
+          Medicojob CI notification
+
+          Service: ${{ inputs.service }}
+          Status: ${{ inputs.status }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    - name: Skip email notification
+      if: ${{ inputs.email-to == '' || inputs.email-from == '' || inputs.smtp-server == '' || inputs.smtp-port == '' || inputs.smtp-username == '' || inputs.smtp-password == '' }}
+      shell: bash
+      run: echo "Email notification settings are not fully configured; skipping email."
