@@ -98,6 +98,47 @@ jobs:
 
           
 
+      - name: Create SonarQube project when missing
+        if: ${{ steps.validate-sonar.outcome == 'success' }}
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_KEY: ${{ inputs.sonar_project_key || vars.SONAR_PROJECT_KEY || secrets.SONAR_PROJECT_KEY }}
+          SONAR_PROJECT_NAME: ${{ inputs.service_name }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          existing_status=$(curl -sS -o /tmp/sonar-project-search.json -w "%{http_code}" \
+            -u "${SONAR_TOKEN}:" \
+            "${SONAR_HOST_URL}/api/projects/search?projects=${SONAR_PROJECT_KEY}")
+
+          if [ "$existing_status" != "200" ]; then
+            echo "Unable to check SonarQube project '${SONAR_PROJECT_KEY}'. HTTP ${existing_status}"
+            cat /tmp/sonar-project-search.json
+            exit 1
+          fi
+
+          if grep -q "\"key\":\"${SONAR_PROJECT_KEY}\"" /tmp/sonar-project-search.json; then
+            echo "SonarQube project '${SONAR_PROJECT_KEY}' already exists."
+            exit 0
+          fi
+
+          create_status=$(curl -sS -o /tmp/sonar-project-create.json -w "%{http_code}" \
+            -u "${SONAR_TOKEN}:" \
+            -X POST \
+            --data-urlencode "project=${SONAR_PROJECT_KEY}" \
+            --data-urlencode "name=${SONAR_PROJECT_NAME}" \
+            "${SONAR_HOST_URL}/api/projects/create")
+
+          if [ "$create_status" != "200" ]; then
+            echo "Failed to create SonarQube project '${SONAR_PROJECT_KEY}'. HTTP ${create_status}"
+            echo "Your SONAR_TOKEN must have global 'Create Projects' permission, or create the project manually in SonarQube."
+            cat /tmp/sonar-project-create.json
+            exit 1
+          fi
+
+          echo "Created SonarQube project '${SONAR_PROJECT_KEY}'."
+
       - name: Scan using SonarQube
         if: ${{ steps.validate-sonar.outcome == 'success' }}
         uses: SonarSource/sonarqube-scan-action@v7.1.0
