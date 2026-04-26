@@ -104,14 +104,22 @@ const JobListings = () => {
       return;
     }
 
+    const allowLocation = globalThis.confirm(
+      'MedicoJob uses your location only to find nearby job opportunities. Continue?'
+    );
+
+    if (!allowLocation) {
+      return;
+    }
+
     setLocationLoading(true);
-    if (!navigator.geolocation) {
+    if (!globalThis.navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
       setLocationLoading(false);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    globalThis.navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
         setNearbyMode(true);

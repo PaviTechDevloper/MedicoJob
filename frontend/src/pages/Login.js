@@ -6,8 +6,8 @@ import { AuthContext } from '../context/AuthContext';
 import { Stethoscope, Mail, Lock, ArrowRight, ShieldCheck, Zap, Eye, EyeOff, XCircle } from 'lucide-react';
 
 const demoAccounts = [
-  { label: 'Applicant Demo', email: 'applicant@medicojob.com', password: 'Demo123!' },
-  { label: 'Hospital Demo', email: 'hospital@medicojob.com', password: 'Demo123!' },
+  { label: 'Applicant Demo', email: 'applicant@medicojob.com' },
+  { label: 'Hospital Demo', email: 'hospital@medicojob.com' },
 ];
 
 const Login = () => {
@@ -21,7 +21,7 @@ const Login = () => {
 
   const selectDemoAccount = (account) => {
     setEmail(account.email);
-    setPassword(account.password);
+    setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
     setError('');
   };
 
@@ -110,7 +110,7 @@ const Login = () => {
                   <div className="text-sm">
                     <p className="font-black text-slate-900">{account.label}</p>
                     <p className="text-slate-500">{account.email}</p>
-                    <p className="text-slate-500">{account.password}</p>
+                    <p className="text-slate-500">Demo password configured by environment</p>
                   </div>
                   <button
                     type="button"
