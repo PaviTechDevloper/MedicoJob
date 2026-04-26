@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { API_BASE_URL } from '../utils/api';
 import {
-  ArrowLeft, Check, X, Clock, User, Stethoscope, Star, Phone,
-  Mail, MapPin, Award, FileText, Eye, XCircle, ShieldCheck, ThumbsUp, Send,
-  MessageSquare, ChevronRight, AlertCircle, Zap
+  ArrowLeft, User, Star, Phone,
+  Mail, Eye, XCircle, ShieldCheck, Send,
+  Zap
 } from 'lucide-react';
 
 const STATUS_STYLES = {
@@ -16,13 +17,24 @@ const STATUS_STYLES = {
 };
 
 // Modal for entering rejection reason or next steps
-const FeedbackModal = ({ type, onConfirm, onCancel }) => {
+function FeedbackModal({ type, onConfirm, onCancel }) {
   const [text, setText] = useState('');
   const isReject = type === 'rejected';
+  const handleBackdropKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onCancel();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={onCancel}>
-      <div className="bg-white rounded-[2rem] max-w-md w-full shadow-2xl p-8" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleBackdropKeyDown}
+    >
+      <div className="bg-white rounded-[2rem] max-w-md w-full shadow-2xl p-8">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 ${isReject ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
            {isReject ? <XCircle size={24} /> : <Zap size={24} />}
         </div>
@@ -62,13 +74,24 @@ const FeedbackModal = ({ type, onConfirm, onCancel }) => {
       </div>
     </div>
   );
+}
+
+FeedbackModal.propTypes = {
+  type: PropTypes.oneOf(['rejected', 'shortlisted']).isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
-const ApplicantModal = ({ applicant, reviews, hospitalId, onReviewSubmit, onClose }) => {
+function ApplicantModal({ applicant, reviews, hospitalId, onReviewSubmit, onClose }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const handleBackdropKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  };
 
   if (!applicant) return null;
 
@@ -98,6 +121,7 @@ const ApplicantModal = ({ applicant, reviews, hospitalId, onReviewSubmit, onClos
       setComment('');
       alert('Review submitted successfully!');
     } catch (err) {
+      console.error('Failed to submit review.', err);
       alert('Failed to submit review.');
     } finally {
       setSubmitting(false);
@@ -105,10 +129,15 @@ const ApplicantModal = ({ applicant, reviews, hospitalId, onReviewSubmit, onClos
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={handleBackdropKeyDown}
+    >
       <div
         className="bg-white rounded-[2.5rem] max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col md:flex-row h-full max-h-[90vh]"
-        onClick={e => e.stopPropagation()}
       >
         <div className="bg-slate-900 p-8 text-white md:w-1/3 flex flex-col items-center text-center shrink-0">
           <div className="w-24 h-24 rounded-3xl bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center mb-6">
@@ -225,6 +254,33 @@ const ApplicantModal = ({ applicant, reviews, hospitalId, onReviewSubmit, onClos
       </div>
     </div>
   );
+}
+
+ApplicantModal.propTypes = {
+  applicant: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    specialization: PropTypes.string,
+    email: PropTypes.string,
+    phone: PropTypes.string,
+    licenseNumber: PropTypes.string,
+    bio: PropTypes.string,
+    preferredLocations: PropTypes.arrayOf(PropTypes.string),
+    skills: PropTypes.arrayOf(PropTypes.string),
+  }),
+  reviews: PropTypes.shape({
+    averageRating: PropTypes.number,
+    count: PropTypes.number,
+  }),
+  hospitalId: PropTypes.string,
+  onReviewSubmit: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+
+ApplicantModal.defaultProps = {
+  applicant: null,
+  reviews: null,
+  hospitalId: null,
 };
 
 const ApplicationsTracking = () => {
@@ -267,6 +323,7 @@ const ApplicationsTracking = () => {
       setApplicantReputations(reputations);
       setLoading(false);
     } catch (err) {
+      console.error('Failed to fetch job application details.', err);
       setLoading(false);
     }
   };
@@ -295,6 +352,7 @@ const ApplicationsTracking = () => {
       );
       await fetchJobDetails();
     } catch (err) {
+      console.error('Failed to update application status.', err);
       alert('Failed to update status.');
     } finally {
       setUpdating(null);
