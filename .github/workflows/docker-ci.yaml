@@ -1,0 +1,138 @@
+name: Medicojob Docker Image Pipeline
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+  workflow_run:
+    workflows:
+      - Medicojob CI Pipeline
+    types:
+      - completed
+    branches:
+      - master
+
+concurrency:
+  group: medicojob-docker-${{ github.repository }}-${{ github.event.pull_request.number || github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+  packages: write
+  security-events: write
+
+jobs:
+  verify-release:
+    name: Verify merged PR and CI
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify CI succeeded before building images
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            if (context.eventName === 'workflow_run') {
+              const run = context.payload.workflow_run;
+              core.info(`CI passed: ${run.html_url}`);
+              return;
+            }
+
+            const headSha = context.payload.pull_request.head.sha;
+
+            const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              owner,
+              repo,
+              workflow_id: 'ci.yaml',
+              event: 'pull_request',
+              status: 'completed',
+              head_sha: headSha,
+              per_page: 100,
+            });
+
+            const passedRun = runs.find((run) => run.conclusion === 'success');
+
+            if (!passedRun) {
+              core.setFailed(`No successful Medicojob CI Pipeline run found for PR head SHA ${headSha}.`);
+              return;
+            }
+
+            core.info(`CI passed: ${passedRun.html_url}`);
+
+  frontend:
+    name: Frontend Docker
+    needs: verify-release
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: frontend
+      service_path: frontend
+    secrets: inherit
+
+  api-gateway:
+    name: API Gateway Docker
+    needs: frontend
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: api-gateway
+      service_path: backend/api-gateway
+    secrets: inherit
+
+  user-service:
+    name: User Service Docker
+    needs: api-gateway
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: user-service
+      service_path: backend/user-service
+    secrets: inherit
+
+  job-service:
+    name: Job Service Docker
+    needs: user-service
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: job-service
+      service_path: backend/job-service
+    secrets: inherit
+
+  matching-service:
+    name: Matching Service Docker
+    needs: job-service
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: matching-service
+      service_path: backend/matching-service
+    secrets: inherit
+
+  availability-service:
+    name: Availability Service Docker
+    needs: matching-service
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: availability-service
+      service_path: backend/availability-service
+    secrets: inherit
+
+  location-service:
+    name: Location Service Docker
+    needs: availability-service
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: location-service
+      service_path: backend/location-service
+    secrets: inherit
+
+  reputation-service:
+    name: Reputation Service Docker
+    needs: location-service
+    uses: ./.github/workflows/docker_service_pipeline.yml
+    with:
+      service_name: reputation-service
+      service_path: backend/reputation-service
+    secrets: inherit
