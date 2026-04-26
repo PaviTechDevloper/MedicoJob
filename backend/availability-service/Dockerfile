@@ -13,9 +13,10 @@ FROM node:18-alpine AS runner
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
+COPY --from=deps --chown=node:node --chmod=0555 /usr/src/app/node_modules ./node_modules
 
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY --chown=node:node --chmod=0444 package*.json ./
+COPY --chown=node:node --chmod=0444 server.js ./
 
 USER node
 

@@ -33,19 +33,19 @@ app.get('/health', (req, res) => res.send('API Gateway is running'));
 
 // Proxy definitions
 const proxies = [
-  { path: '/auth', target: process.env.USER_SERVICE_URL || 'https//user-service:5001' },
-  { path: '/jobs', target: process.env.JOB_SERVICE_URL || 'https//job-service:5002', ws: true },
-  { path: '/match', target: process.env.MATCHING_SERVICE_URL || 'https//matching-service:5003' },
-  { path: '/availability', target: process.env.AVAILABILITY_SERVICE_URL || 'https//availability-service:5004' },
-  { path: '/location', target: process.env.LOCATION_SERVICE_URL || 'https//location-service:5005' },
-  { path: '/nearby', target: process.env.LOCATION_SERVICE_URL || 'https//location-service:5005' },
-  { path: '/reviews', target: process.env.REPUTATION_SERVICE_URL || 'https//reputation-service:5006' },
-  { path: '/socket.io', target: process.env.JOB_SERVICE_URL || 'https//job-service:5002', ws: true },
+  { path: '/auth', target: process.env.USER_SERVICE_URL || 'https://user-service:5001' },
+  { path: '/jobs', target: process.env.JOB_SERVICE_URL || 'https://job-service:5002', ws: true },
+  { path: '/match', target: process.env.MATCHING_SERVICE_URL || 'https://matching-service:5003' },
+  { path: '/availability', target: process.env.AVAILABILITY_SERVICE_URL || 'https://availability-service:5004' },
+  { path: '/location', target: process.env.LOCATION_SERVICE_URL || 'https://location-service:5005' },
+  { path: '/nearby', target: process.env.LOCATION_SERVICE_URL || 'https://location-service:5005' },
+  { path: '/reviews', target: process.env.REPUTATION_SERVICE_URL || 'https://reputation-service:5006' },
+  { path: '/socket.io', target: process.env.JOB_SERVICE_URL || 'https://job-service:5002', ws: true },
 ];
 
 // Explicitly define the WebSocket proxy for socket.io
 const wsProxy = createProxyMiddleware({
-  target: process.env.JOB_SERVICE_URL || 'http://job-service:5002',
+  target: process.env.JOB_SERVICE_URL || 'https://job-service:5002',
   changeOrigin: true,
   ws: true,
   logLevel: 'debug'
